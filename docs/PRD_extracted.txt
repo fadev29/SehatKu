@@ -1,0 +1,316 @@
+--- PAGE 1 ---
+Sehatku PRD v0.3
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+STATUS: DRAFT SEMENTARA - REVISI TEKNIS PERCETAKAN
+Sehatku
+Nama Produk Sistem Booking Klinik, QR Check-in, Antrean Dokter, dan Monitor Pemanggilan 
+(Sehatku)
+Versi Dokumen v0.3
+Disusun oleh Tim Pengembang Sehatku (Pengembang)
+Untuk Pihak Manajemen Klinik (Klien)
+Tanggal 22 Agustus 2026
+Dokumen Terkait PRD v0.2 dan Notulen Rapat (MoM) - 18 Agustus 2026
+1. Ringkasan Produk (Overview)
+Proses pendaftaran dan pengelolaan antrean di klinik konvensional saat ini sering kali masih mengandalkan 
+sistem manual yang menyebabkan penumpukan pasien di ruang tunggu, proses check-in yang lambat, 
+serta kurangnya transparansi informasi urutan pelayanan bagi pasien maupun tenaga medis. Kondisi ini 
+menimbulkan ketidakefisienan operasional dan pain point berupa waktu tunggu yang lama serta kesulitan 
+dalam memantau rekam kehadiran pasien secara akurat.
+Untuk mengatasi permasalahan tersebut, dikembangkan Sehatku, sebuah sistem aplikasi manajemen klinik 
+berbasis web yang terintegrasi. Sistem ini mencakup panel layanan mandiri bagi pasien untuk melakukan 
+booking online dan perhitungan indeks massa tubuh (BMI), modul pemindaian kode QR bagi petugas front-
+office untuk mempercepat check-in, pencetakan struk antrean thermal langsung dari smartphone Android 
+melalui Web Bluetooth dan generator ESC/POS, panel kontrol dokter untuk mengelola status pasien secara 
+realtime, layar monitor antrean dengan video edukasi kesehatan saat idle, serta panel admin untuk 
+pengelolaan data operasional klinik.
+2. Tujuan & Sasaran (Goals)
+ Memusatkan manajemen data operasional klinik dan pelayanan pasien secara digital.
+ Mengurangi penumpukan antrean manual di area pendaftaran klinik.
+ Mempercepat proses check-in pasien melalui pemindaian kode QR yang akurat.
+ Memungkinkan petugas mencetak tiket antrean langsung dari smartphone Android tanpa dialog print sistem 
+operasi, driver desktop, atau QZ Tray.
+ Memudahkan tenaga medis (dokter) dalam mengelola pemanggilan dan status layanan pasien secara 
+efisien.
+ Menyediakan tampilan antrean secara realtime di monitor disertai ruang edukasi kesehatan lewat video saat 
+belum ada pemanggilan aktif.
+ Memberikan kontrol penuh kepada admin atas seluruh master data operasional dan laporan harian klinik.
+
+--- PAGE 2 ---
+Sehatku PRD v0.3
+3. Pengguna & Peran (Users & Roles)
+Guest / User Umum : Pengunjung website yang dapat melihat informasi pada landing page serta melakukan 
+proses pendaftaran akun (register) atau masuk (login).
+Patient (Pasien) : Pengguna terautentikasi yang dapat memilih lokasi klinik dan dokter, mengisi data tinggi serta 
+berat badan (dengan kalkulasi BMI otomatis), melakukan booking jadwal, dan mendapatkan QR code unik.
+Petugas (Staff) : Staf front-office yang menggunakan smartphone Android untuk memindai QR code pasien, 
+memvalidasi booking, menghasilkan nomor antrean, menghubungkan printer thermal melalui Web Bluetooth, 
+mencetak tiket menggunakan ESC/POS, melakukan pencarian manual, dan reprint.
+Dokter : Tenaga medis yang mengakses panel khusus untuk melihat daftar antrean harian, data antropometri 
+pasien, serta mengontrol status pelayanan (Panggil, Skip, Selesai).
+Monitor : Perangkat layar display khusus di ruang tunggu yang menampilkan nomor antrean aktif, poli/ruangan 
+secara realtime, serta memutar video edukasi kesehatan dari YouTube saat kondisi idle.
+Admin : Pengguna dengan hak akses tertinggi yang mengelola master data (klinik, dokter, layanan/poli, jadwal, 
+user, video edukasi) serta memantau laporan operasional harian.
+4. Ruang Lingkup (Scope)
+4.1 Termasuk (MVP)
+ Landing page responsif lengkap dengan hero section, informasi layanan, dan bagian promosi/edukasi 
+kesehatan.
+ Sistem autentikasi lengkap (registrasi, login, logout, dan pengaturan akses berbasis peran).
+ Modul booking online (pilih tempat, dokter, tanggal, jam, input antropometri, kalkulasi BMI, dan pembuatan 
+QR Code unik).
+ Modul QR check-in oleh petugas (scan QR, validasi, pencarian manual, penerbitan nomor antrean, cetak 
+tiket, dan reprint).
+ Integrasi Web Bluetooth pada smartphone Android untuk discovery, pairing/permission, koneksi BLE GATT, 
+dan pemantauan status printer.
+ Generator ESC/POS di sisi frontend untuk membentuk payload tiket antrean menjadi byte command printer 
+thermal.
+ Panel dokter (daftar antrean aktif, detail pasien, tombol aksi Panggil, Skip, dan Selesai).
+ Modul monitor antrean (role khusus display, pemanggilan realtime, serta pemutaran video YouTube edukasi 
+kesehatan saat idle dengan fitur auto-switch).
+ Panel admin dasar (pengelolaan master data CRUD, manajemen booking dan antrean, pengelolaan video, 
+serta laporan harian).
+4.2 Di Luar Lingkup Awal / Fase Lanjutan
+Fitur pembayaran online, integrasi BPJS, rekam medis elektronik (EMR) lengkap, fitur chat dokter, layanan 
+telemedicine, dan integrasi laboratorium ditunda ke tahap lanjutan. Dukungan printer non-BLE, printer yang 
+membutuhkan driver desktop khusus, serta aplikasi native Android khusus juga tidak termasuk dalam MVP 
+selama Web Bluetooth dapat memenuhi kebutuhan operasional.
+
+--- PAGE 3 ---
+Sehatku PRD v0.3
+5. Asumsi & Batasan (Assumptions & Constraints)
+ Asumsi Pengembang: Sistem dibangun berbasis web responsif yang dapat diakses melalui desktop, tablet, 
+dan smartphone.
+ Asumsi Pengembang: Proses scan QR dan pencetakan tiket oleh petugas menggunakan smartphone 
+Android dengan browser berbasis Chromium/Chrome yang mendukung Web Bluetooth.
+ Asumsi Pengembang: Aplikasi produksi harus berjalan melalui HTTPS (secure context); localhost digunakan 
+untuk pengembangan.
+ Asumsi Pengembang: Printer thermal harus mendukung BLE GATT dan menyediakan characteristic yang 
+writable serta menerima perintah ESC/POS.
+ Asumsi Pengembang: Lingkungan klinik memiliki koneksi internet stabil untuk sinkronisasi data antrean 
+realtime dan pemutaran video.
+ Batasan: Pemilihan/perizinan perangkat Bluetooth pertama kali membutuhkan aksi pengguna (user gesture) 
+dan tidak boleh dilakukan otomatis tanpa interaksi.
+ Batasan: Koneksi Bluetooth dapat terputus akibat jarak, sleep mode, atau perubahan status perangkat; 
+sistem wajib menyediakan reconnect dan status koneksi yang jelas.
+ Batasan: Pembayaran layanan medis dilakukan offline karena pembayaran digital berada pada fase lanjutan.
+ Batasan: Pemutaran video edukasi kesehatan bergantung pada jaringan internet eksternal.
+6. Arsitektur Percetakan Thermal
+Percetakan tiket antrean pada MVP menggunakan Web Bluetooth API di browser Android. Frontend Nuxt 
+mengelola koneksi BLE GATT, sedangkan modul ESC/POS Generator membentuk konten tiket menjadi 
+byte printer. Data tiket tidak dikirim ke layanan pihak ketiga dan dicetak langsung dari perangkat staff ke 
+printer thermal yang terhubung.
+HP Android Staff - Chrome / Nuxt
+↓
+Web Bluetooth API - navigator.bluetooth
+↓
+BLE GATT Service + Writable Characteristic
+↓
+ESC/POS byte payload
+↓
+Printer Thermal
+↓
+Tiket Antrean Tercetak
+
+--- PAGE 4 ---
+Sehatku PRD v0.3
+Profil printer referensi yang telah diuji (RPP02N-43E4)
+ Service UUID: 0000ff00-0000-1000-8000-00805f9b34fb
+ Write Characteristic UUID: 0000ff02-0000-1000-8000-00805f9b34fb
+ Characteristic mendukung Write dan Write Without Response.
+ Payload ESC/POS dikirim sebagai byte/Uint8Array. Profil UUID harus berada dalam konfigurasi printer agar 
+dapat diganti tanpa mengubah alur bisnis.
+6.1 Tanggung Jawab Modul Web Bluetooth
+ Meminta user memilih printer melalui device picker browser.
+ Membuka koneksi GATT dan mengambil service serta characteristic sesuai profil printer.
+ Menyediakan status: Tidak Terhubung, Menghubungkan, Terhubung, dan Gagal.
+ Menyimpan referensi perangkat yang telah diizinkan untuk reconnect pada sesi berikutnya jika browser 
+mengizinkan.
+ Menangani event disconnect serta memberikan tombol Sambungkan Ulang.
+6.2 Tanggung Jawab ESC/POS Generator
+ Menginisialisasi printer dan mengatur alignment, emphasis/bold, ukuran teks, line feed, serta 
+pemotongan/feed sesuai kemampuan perangkat.
+ Mengubah data antrean menjadi byte ESC/POS, bukan HTML/CSS print.
+ Mendukung template tiket: nama klinik, poli, nomor antrean, pasien, tanggal/jam, dan pesan instruksi.
+ Memecah payload menjadi chunk BLE yang aman bila panjang data melebihi kapasitas satu operasi write.
+ Menghasilkan error yang dapat ditangani UI bila encoding atau proses pengiriman gagal.
+
+--- PAGE 5 ---
+Sehatku PRD v0.3
+7. Kebutuhan Fungsional (Functional Requirements)
+7.1 Guest - Halaman Landing & Akses Awal
+ID Kebutuhan Fungsional Prioritas
+LAND-1 Sistem harus menampilkan halaman landing saat website pertama kali dibuka. Wajib
+LAND-2 Sistem harus menampilkan tombol CTA "Booking Sekarang" serta tombol masuk dan pendaftaran. Wajib
+7.2 Patient - Autentikasi & Pemesanan Jadwal
+ID Kebutuhan Fungsional Prioritas
+AUTH-1 Sistem harus mengharuskan user melakukan registrasi atau login akun sebelum booking. Wajib
+AUTH-2 Sistem harus mendukung pengelolaan sesi pengguna. Wajib
+BOOK-1 Sistem harus memungkinkan pasien memilih lokasi klinik, dokter, tanggal, dan jam. Wajib
+BOOK-2 Sistem harus memungkinkan pasien memasukkan data tinggi dan berat badan. Wajib
+BOOK-3 Sistem harus menghitung nilai BMI dan status berat badan otomatis. Wajib
+BOOK-4 Sistem harus menghasilkan QR code booking unik. Wajib
+7.3 Petugas - QR Check-in & Percetakan Antrean
+ID Kebutuhan Fungsional Prioritas
+STF-1 Sistem harus menyediakan halaman scan QR code pasien pada smartphone staff. Wajib
+STF-2 Sistem harus memvalidasi keabsahan data booking saat QR dipindai. Wajib
+STF-3 Sistem harus menghasilkan nomor antrean setelah check-in valid. Wajib
+STF-4 Sistem harus menyediakan tombol "Sambungkan Printer" menggunakan Web Bluetooth. Wajib
+STF-5 Sistem harus menampilkan status koneksi printer secara jelas pada halaman staff. Wajib
+STF-6 Sistem harus menghasilkan payload tiket melalui ESC/POS Generator. Wajib
+STF-7 Sistem harus mengirim payload ESC/POS ke BLE writable characteristic printer dan menampilkan 
+hasil proses cetak.
+Wajib
+STF-8 Sistem harus mendukung pencarian manual dan cetak ulang (reprint). Penting
+STF-9 Sistem harus memberikan pesan error dan opsi reconnect bila printer terputus atau write gagal. Wajib
+STF-10 Sistem harus mencegah duplikasi pencetakan yang tidak disengaja dengan loading state/debounce 
+dan pencatatan print job.
+Penting
+
+--- PAGE 6 ---
+Sehatku PRD v0.3
+7.4 Dokter - Panel Kontrol Pelayanan Medis
+ID Kebutuhan Fungsional Prioritas
+DOC-1 Sistem harus menampilkan daftar antrean aktif spesifik per sesi/poli. Wajib
+DOC-2 Sistem harus menampilkan detail pasien (tinggi, berat, BMI, status). Wajib
+DOC-3 Sistem harus menyediakan tombol aksi "Panggil". Wajib
+DOC-4 Sistem harus menyediakan tombol aksi "Skip". Penting
+DOC-5 Sistem harus menyediakan tombol aksi "Selesai". Wajib
+7.5 Monitor - Tampilan Antrean & Edukasi Kesehatan
+ID Kebutuhan Fungsional Prioritas
+MON-1 Sistem harus menyediakan peran monitor khusus layar penuh. Wajib
+MON-2 Sistem harus menampilkan nomor antrean aktif, dokter, ruang secara realtime. Wajib
+MON-3 Sistem harus memutar video YouTube edukasi kesehatan saat idle. Wajib
+MON-4 Sistem harus melakukan peralihan otomatis ke tampilan pemanggilan saat ada nomor baru. Wajib
+7.6 Admin - Manajemen Sistem & Laporan
+ID Kebutuhan Fungsional Prioritas
+ADM-1 Sistem harus memungkinkan admin mengelola master data (CRUD). Wajib
+ADM-2 Sistem harus memungkinkan admin mengelola data pengguna. Wajib
+ADM-3 Sistem harus memungkinkan admin memantau data booking dan antrean. Wajib
+ADM-4 Sistem harus memungkinkan admin mengelola daftar video iklan/edukasi. Penting
+ADM-5 Sistem harus menyediakan laporan operasional harian. Penting
+ADM-6 Sistem harus memungkinkan konfigurasi profil printer (nama, service UUID, characteristic UUID, 
+mode write, dan status aktif).
+Penting
+8. Alur Pengguna Utama (Key User Flows)
+8.1 Alur Pembuatan Booking
+1. Pasien membuka website dan melakukan login/register.
+2. Pasien memilih lokasi, dokter, waktu, serta mengisi data antropometri.
+3. Sistem menghitung BMI, menyimpan booking, dan menampilkan QR Code.
+8.2 Alur Check-in dan Pencetakan Antrean
+4. Petugas membuka halaman staff pada Chrome Android dan memastikan status printer Terhubung. Jika 
+belum, petugas menekan "Sambungkan Printer" dan memilih perangkat thermal melalui Web Bluetooth 
+picker.
+5. Pasien menunjukkan QR Code kepada petugas front-office.
+6. Petugas memindai QR code dan sistem memvalidasi booking.
+7. Sistem menerbitkan nomor antrean dan menampilkan preview data tiket.
+8. Petugas menekan tombol "Print Tiket".
+9. ESC/POS Generator membentuk byte tiket dan modul Web Bluetooth menulis payload ke BLE writable 
+characteristic.
+
+--- PAGE 7 ---
+Sehatku PRD v0.3
+10. Printer thermal mencetak tiket. Sistem menyimpan status print job dan waktu cetak.
+11. Jika koneksi terputus atau write gagal, UI menampilkan error dan tombol reconnect/retry tanpa membuat 
+nomor antrean baru.
+8.3 Alur Pelayanan Dokter dan Pemanggilan
+12. Dokter membuka panel antrean dan menekan tombol "Panggil".
+13. Sistem memperbarui monitor antrean ke tampilan fokus pemanggilan.
+14. Layar monitor memutar video edukasi saat kondisi idle.
+15. Dokter menekan "Selesai" atau "Skip" setelah sesi berakhir.
+
+--- PAGE 8 ---
+Sehatku PRD v0.3
+9. Model Data (High-Level)
+Entitas Field Utama Keterangan
+user id, username, email, role_id Akun pengguna
+patient id, full_name, phone Profil pasien
+doctor id, full_name, specialization Tenaga medis
+booking id, patient_id, schedule_date, bmi_result, qr_token Data pemesanan
+queue id, check_in_id, doctor_id, queue_number, status Status antrean
+print_job id, queue_id, printer_profile_id, status, printed_at, 
+error_message
+Audit proses pencetakan / reprint
+printer_profile id, name, service_uuid, characteristic_uuid, write_mode, 
+is_active
+Konfigurasi Web Bluetooth printer
+monitor_ads id, title, youtube_url, is_active Konten layar
+10. Kebutuhan Non-Fungsional
+ Responsivitas Web: Antarmuka optimal di desktop, tablet, dan smartphone; workflow scan/print diprioritaskan 
+untuk Android.
+ Keamanan: Role-Based Access Control (RBAC) yang ketat; QR token tidak menampilkan data medis sensitif 
+secara langsung.
+ Secure Context: Web Bluetooth hanya digunakan pada HTTPS di produksi atau localhost saat 
+pengembangan.
+ Kecepatan: Proses scan QR ditargetkan < 2 detik; perintah print mulai dikirim maksimal 2 detik setelah 
+tombol Print ditekan ketika printer sudah terhubung.
+ Realtime: Sinkronisasi antrean dokter dan monitor berlangsung seketika.
+ Stabilitas Bluetooth: Sistem harus mendeteksi disconnect, mencegah UI menampilkan status palsu, dan 
+menyediakan reconnect/retry.
+ Idempotensi: Check-in dan penerbitan nomor antrean tidak boleh terduplikasi akibat retry cetak.
+ Auditability: Setiap print/reprint dicatat minimal berupa queue_id, status, waktu, dan error bila ada.
+ Kompatibilitas Printer: Printer harus mendukung ESC/POS dan menyediakan BLE GATT writable 
+characteristic yang dapat diakses browser.
+ Stabilitas Media: Pemutaran video edukasi YouTube tetap stabil pada monitor.
+11. Integrasi & Komponen Teknis
+Layanan / Komponen Fungsi Catatan
+Web Bluetooth API Discovery, permission, koneksi BLE GATT, 
+akses service/characteristic
+Browser Android Chromium; membutuhkan 
+secure context dan user gesture
+ESC/POS Generator Membentuk tiket antrean menjadi byte 
+command printer
+Modul internal frontend Nuxt; output 
+Uint8Array/chunk BLE
+Printer Profile Memetakan service UUID dan characteristic 
+UUID
+RPP02N default: FF00 -> FF02; dapat 
+dikonfigurasi
+YouTube API / Embed Pemutaran video edukasi Frontend embedded player
+12. Kriteria Penerimaan Percetakan (Acceptance Criteria)
+ Staff dapat menekan "Sambungkan Printer" dan memilih printer melalui Chrome Android.
+
+--- PAGE 9 ---
+Sehatku PRD v0.3
+ Setelah terhubung, status UI berubah menjadi "Printer Terhubung" dan tombol Print aktif.
+ Satu kali klik Print pada antrean valid menghasilkan satu tiket fisik yang terbaca.
+ Tiket memuat minimal nama klinik, poli/dokter, nomor antrean, tanggal/jam, dan instruksi menunggu.
+ Jika printer mati/menjauh, sistem mendeteksi disconnect dan menonaktifkan Print hingga reconnect.
+ Reprint dapat dilakukan tanpa membuat queue number baru dan tercatat sebagai print job baru.
+ Perubahan profil UUID printer tidak membutuhkan perubahan alur booking/check-in.
+13. Fitur Usulan / Fase Lanjutan
+ Pembayaran Online : Integrasi transfer bank/e-wallet untuk booking.
+ Integrasi BPJS : Validasi kepesertaan otomatis.
+ Rekam Medis (EMR) : Pencatatan medis digital.
+ Telemedicine : Konsultasi jarak jauh.
+ Integrasi Lab : Sinkronisasi hasil lab.
+ Native Android Wrapper : Opsional bila di masa depan dibutuhkan akses Bluetooth yang lebih luas 
+daripada Web Bluetooth.
+ Multi-printer Profile : Dukungan beberapa model printer dengan template/UUID berbeda.
+14. Pertanyaan Terbuka / TBD
+ Nama brand resmi klinik.
+ Printer thermal produksi final dan jumlah unit per lokasi.
+ Spesifikasi minimum smartphone Android untuk staff.
+ Penyedia hosting/server produksi.
+ Daftar tautan video YouTube edukasi awal.
+ Kebijakan retensi log print_job dan kebutuhan laporan reprint.
+15. Glosarium
+ Sehatku : Nama produk sistem.
+ BMI : Indeks Massa Tubuh.
+ Idle State : Kondisi monitor tanpa panggilan aktif.
+ Web Bluetooth : Web API browser untuk memilih dan berkomunikasi dengan perangkat BLE melalui GATT.
+ BLE : Bluetooth Low Energy.
+ GATT : Generic Attribute Profile; struktur service dan characteristic pada BLE.
+ ESC/POS : Kumpulan command byte yang umum digunakan printer thermal/POS untuk format dan 
+pencetakan.
+ ESC/POS Generator : Modul aplikasi yang mengubah data tiket menjadi byte ESC/POS.
+ Writable Characteristic : Characteristic BLE dengan properti Write/Write Without Response untuk 
+menerima payload dari aplikasi.
+ Print Job : Catatan satu percobaan pencetakan atau reprint tiket antrean.
+Catatan implementasi MVP
+ Alur cetak produksi: Nuxt pada Chrome Android -> Web Bluetooth -> BLE GATT -> ESC/POS -> printer 
+thermal.
+ QZ Tray, driver printer desktop, dan dialog window.print() tidak digunakan untuk workflow staff pada MVP.
+ Profil RPP02N-43E4 yang telah berhasil diuji menjadi konfigurasi awal, tetapi arsitektur dibuat configurable 
+agar printer lain dapat ditambahkan.
+Dokumen ini merupakan draft sementara dan dapat berubah seiring pembahasan lebih lanjut dengan klien.
+

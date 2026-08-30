@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../server/database/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  patient
+  staff
+  doctor
+  admin
+  monitor
+}
+
+enum BookingStatus {
+  booked
+  checked_in
+  cancelled
+  expired
+}
+
+enum QueueStatus {
+  waiting
+  called
+  skipped
+  completed
+}
+
+enum PrintJobType {
+  print
+  reprint
+}
+
+enum PrintJobStatus {
+  pending
+  success
+  failed
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  emailVerified Boolean @default(false)
+  image        String?
+  role         UserRole @default(patient)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  accounts     Account[]
+  patient      Patient?
+  doctor       Doctor?
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  issuer                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([issuer, accountId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Patient {
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  fullName   String
+  phone      String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings   Booking[]
+}
+
+model Clinic {
+  id         String    @id @default(cuid())
+  name       String
+  address    String?
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  services   Service[]
+  doctors    Doctor[]
+}
+
+model Service {
+  id         String    @id @default(cuid())
+  clinicId   String
+  name       String
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  clinic     Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  doctors    Doctor[]
+}
+
+model Doctor {
+  id             String      @id @default(cuid())
+  userId         String?     @unique
+  fullName       String
+  specialization String?
+  clinicId       String
+  serviceId      String
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user           User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clinic         Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  service        Service     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  schedules      Schedule[]
+  bookings       Booking[]
+  queues         Queue[]
+}
+
+model Schedule {
+  id            String    @id @default(cuid())
+  doctorId      String
+  scheduleDate  DateTime
+  startTime     String
+  endTime       String
+  quota         Int
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  doctor        Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id            String         @id @default(cuid())
+  patientId     String
+  clinicId      String
+  doctorId      String
+  scheduleDate  DateTime
+  scheduleTime  String
+  heightCm      Float
+  weightKg      Float
+  bmiResult     Float
+  qrToken       String         @unique
+  status        BookingStatus  @default(booked)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  patient       Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor        Doctor         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  checkIn       CheckIn?
+}
+
+model CheckIn {
+  id             String    @id @default(cuid())
+  bookingId      String    @unique
+  staffUserId    String?
+  checkInMethod  String
+  checkedInAt    DateTime  @default(now())
+
+  booking        Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  queue          Queue?
+}
+
+model Queue {
+  id            String       @id @default(cuid())
+  checkInId     String       @unique
+  doctorId      String
+  queueNumber   String
+  status        QueueStatus  @default(waiting)
+  calledAt      DateTime?
+  completedAt   DateTime?
+  skippedAt     DateTime?
+  createdAt     DateTime     @default(now())
+
+  checkIn       CheckIn      @relation(fields: [checkInId], references: [id], onDelete: Cascade)
+  doctor        Doctor       @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  printJobs     PrintJob[]
+}
+
+model PrinterProfile {
+  id                  String      @id @default(cuid())
+  name                String
+  serviceUuid         String
+  characteristicUuid  String
+  writeMode           String?
+  isActive            Boolean     @default(true)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  printJobs           PrintJob[]
+}
+
+model PrintJob {
+  id                String          @id @default(cuid())
+  queueId           String
+  printerProfileId  String
+  type              PrintJobType
+  status            PrintJobStatus  @default(pending)
+  printedAt         DateTime?
+  errorMessage      String?
+  createdAt         DateTime        @default(now())
+
+  queue             Queue           @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  printerProfile    PrinterProfile  @relation(fields: [printerProfileId], references: [id], onDelete: Cascade)
+}
+
+model MonitorAd {
+  id          String    @id @default(cuid())
+  title       String
+  youtubeUrl  String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}

@@ -1,0 +1,42 @@
+{
+  "name": "antriku",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx server/database/seeds/index.ts",
+    "db:cleanup:patients": "tsx server/database/scripts/cleanup-invalid-patients.ts"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.125",
+    "@iconify-json/simple-icons": "^1.2.93",
+    "@nuxt/ui": "^4.11.0",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "better-auth": "^1.7.1",
+    "dotenv": "^17.4.2",
+    "nuxt": "^4.5.2",
+    "pg": "^8.16.3",
+    "qrcode": "^1.5.4",
+    "tailwindcss": "^4.3.3",
+    "vue-qrcode-reader": "^5.7.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.17.0",
+    "eslint": "^10.9.0",
+    "prisma": "7.10.0",
+    "tsx": "^4.23.12",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.11"
+  },
+  "packageManager": "pnpm@11.22.0"
+}
