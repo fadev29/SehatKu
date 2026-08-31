@@ -2,6 +2,7 @@ export type AppRole = "patient" | "staff" | "doctor" | "admin" | "monitor";
 
 type SessionUser = {
   role?: string | null;
+  monitorClinicId?: string | null;
 };
 
 type AuthSession = {

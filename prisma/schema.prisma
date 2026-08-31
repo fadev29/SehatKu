@@ -46,19 +46,21 @@ enum PrintJobStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String?
-  email        String   @unique
-  emailVerified Boolean @default(false)
-  image        String?
-  role         UserRole @default(patient)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String?
+  email           String   @unique
+  emailVerified   Boolean  @default(false)
+  image           String?
+  role            UserRole @default(patient)
+  monitorClinicId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  accounts     Account[]
-  patient      Patient?
-  doctor       Doctor?
-  sessions     Session[]
+  accounts        Account[]
+  patient         Patient?
+  doctor          Doctor?
+  sessions        Session[]
+  monitorClinic   Clinic?  @relation("MonitorClinicUsers", fields: [monitorClinicId], references: [id], onDelete: SetNull)
 }
 
 model Session {
@@ -117,15 +119,16 @@ model Patient {
 }
 
 model Clinic {
-  id         String    @id @default(cuid())
-  name       String
-  address    String?
-  isActive   Boolean   @default(true)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  name          String
+  address       String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  services   Service[]
-  doctors    Doctor[]
+  services      Service[]
+  doctors       Doctor[]
+  monitorUsers  User[]    @relation("MonitorClinicUsers")
 }
 
 model Service {

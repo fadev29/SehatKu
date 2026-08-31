@@ -16,8 +16,8 @@ const youtubeUrlSchema = z.string().url().refine((value) => {
   return normalizedHost === 'youtube.com'
     || normalizedHost === 'www.youtube.com'
     || normalizedHost === 'm.youtube.com'
-}
-, 'URL harus URL YouTube valid')
+},
+'URL harus URL YouTube valid')
 
 export const clinicSchema = z.object({
   name: z.string().min(1),
@@ -48,7 +48,7 @@ export const scheduleSchema = z.object({
   endTime: timeSchema,
   quota: z.number().int().positive(),
   isActive: z.boolean().optional()
-}).refine((data) => data.startTime < data.endTime, {
+}).refine(data => data.startTime < data.endTime, {
   message: 'Jam mulai harus sebelum jam selesai',
   path: ['endTime']
 })
@@ -91,4 +91,11 @@ export const adminBookingSchema = z.object({
 export const adminQueueSchema = z.object({
   status: z.enum(['waiting', 'called', 'skipped', 'completed']),
   queueNumber: z.string().min(1).optional()
+})
+
+export const adminMonitorUserSchema = z.object({
+  name: z.string().trim().min(1),
+  email: z.string().trim().email(),
+  password: z.string().min(8).optional(),
+  clinicId: z.string().min(1)
 })
